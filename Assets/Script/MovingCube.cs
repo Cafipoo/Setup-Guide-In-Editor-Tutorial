@@ -1,5 +1,7 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Rigidbody))]
 public class MovingCube : MonoBehaviour
 {
     [Header("Points de déplacement")]
@@ -48,6 +50,8 @@ public class MovingCube : MonoBehaviour
     private bool isWaiting = false;
     private float waitTimer = 0f;
     private float delayTimer = 0f;
+    private Rigidbody rb;
+    private Collider ownCollider;
     
     public enum MovementType
     {
@@ -58,6 +62,23 @@ public class MovingCube : MonoBehaviour
     
     void Start()
     {
+        // Configurer le Rigidbody pour un déplacement kinematic et éviter de traverser
+        rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;     // on déplace manuellement la plateforme
+            rb.useGravity = false;     // pas de gravité sur la plateforme
+            rb.interpolation = RigidbodyInterpolation.Interpolate; // mouvement plus fluide
+        }
+
+        // S'assurer que le collider est solide (non-trigger) pour bloquer le joueur
+        ownCollider = GetComponent<Collider>();
+        if (ownCollider != null && ownCollider.isTrigger)
+        {
+            ownCollider.isTrigger = false;
+            Debug.LogWarning($"[MovingCube] {gameObject.name} : le collider a été passé en non-trigger pour bloquer le joueur. Pour la mort, utilisez un second collider en trigger avec le script 'death'.");
+        }
+
         // Définir les positions de départ et d'arrivée
         SetupPositions();
         

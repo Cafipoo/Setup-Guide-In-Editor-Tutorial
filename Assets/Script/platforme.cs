@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections;
 
-public class platforme2merde : MonoBehaviour
+[AddComponentMenu("Custom/Platform Controller")]
+public class PlatformController : MonoBehaviour
 {
     [Header("Paramètres de mouvement")]
     [Tooltip("Vitesse de déplacement")]
@@ -15,7 +16,6 @@ public class platforme2merde : MonoBehaviour
     private Coroutine returnCoroutine;
     private Transform playerTransform;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         // Sauvegarde la position initiale
@@ -149,5 +149,23 @@ public class platforme2merde : MonoBehaviour
         // Assure que la position finale est exacte
         transform.position = initialPosition;
         returnCoroutine = null;
+    }
+
+    // Réinitialisation manuelle (utilisé au death/restart du joueur)
+    public void ResetPlatform()
+    {
+        // Stopper tout retour en cours
+        if (returnCoroutine != null)
+        {
+            StopCoroutine(returnCoroutine);
+            returnCoroutine = null;
+        }
+
+        // Réinitialiser l'état
+        isPlayerOnPlatform = false;
+        playerTransform = null;
+
+        // Revenir à la position initiale immédiatement
+        transform.position = initialPosition;
     }
 }

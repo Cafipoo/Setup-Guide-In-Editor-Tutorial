@@ -183,6 +183,18 @@ public class restart : MonoBehaviour
             }
         }
         
+        // Réinitialiser toutes les plateformes (renommées PlatformController)
+        PlatformController[] platforms = FindObjectsOfType<PlatformController>();
+        Debug.Log("Nombre de plateformes trouvées: " + platforms.Length);
+        foreach (PlatformController platform in platforms)
+        {
+            if (platform != null)
+            {
+                platform.ResetPlatform();
+                Debug.Log("Plateforme réinitialisée: " + platform.gameObject.name);
+            }
+        }
+        
         // Détruire toutes les balles restantes
         Projectile[] projectiles = FindObjectsOfType<Projectile>();
         Debug.Log("Nombre de projectiles trouvés: " + projectiles.Length);

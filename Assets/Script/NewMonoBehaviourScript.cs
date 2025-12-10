@@ -42,6 +42,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private Rigidbody rb;
     private bool isGrounded;
+    private bool isJumping = false; // État de saut en cours
     private Collider col;
     private float verticalRotation = 0f;
     private int currentHealth; // Points de vie actuels
@@ -168,7 +169,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
             UpdateAnimationState();
         }
     }
-    
+
     // Update is called once per frame
     void Update()
     {
@@ -183,9 +184,19 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         // Vérification si l'objet est au sol
         CheckGrounded();
+        
+        // Vérifier si le saut est terminé (le joueur est redescendu)
+        if (isJumping)
+        {
+            // Le saut est terminé quand on est au sol ET que la vélocité verticale est proche de zéro ou négative
+            if (isGrounded && rb.linearVelocity.y <= 0.1f)
+            {
+                isJumping = false;
+            }
+        }
 
-        // Saut avec Espace
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        // Saut avec Espace - seulement si on est au sol ET qu'on n'est pas déjà en train de sauter
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !isJumping)
         {
             Jump();
             // Déclencher l'animation de saut qui va forcer l'arrêt des autres animations
@@ -259,7 +270,13 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
 
         // Raycast vers le bas pour vérifier si on est au sol
-        isGrounded = Physics.Raycast(rayStart, Vector3.down, groundCheckDistance, groundLayer);
+        // Inclure les triggers (plateformes mouvantes marquées en Trigger) pour éviter de perdre le saut
+        isGrounded = Physics.Raycast(
+            rayStart,
+            Vector3.down,
+            groundCheckDistance,
+            groundLayer,
+            QueryTriggerInteraction.Collide);
         
         // Debug pour voir le raycast dans l'éditeur
         Debug.DrawRay(rayStart, Vector3.down * groundCheckDistance, isGrounded ? Color.green : Color.red);
@@ -267,6 +284,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Jump()
     {
+        // Marquer qu'on est en train de sauter
+        isJumping = true;
+        
         // Application de la force de saut
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
     }
@@ -390,6 +410,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
     {
         // Réinitialiser l'état de mort
         isDead = false;
+        
+        // Réinitialiser l'état de saut
+        isJumping = false;
         
         // Réinitialiser la santé
         currentHealth = maxHealth;
@@ -567,8 +590,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
             if (TagExists(checkpointTag))
             {
                 if (other.CompareTag(checkpointTag))
-                {
-                    SetCheckpoint(other.transform);
+        {
+            SetCheckpoint(other.transform);
                     checkpointFound = true;
                 }
             }
@@ -590,7 +613,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
         catch
         {
-            return false;
+        return false;
         }
     }
 
@@ -624,8 +647,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
         {
             // Mettre à jour le checkpoint manuellement
             Vector3 oldPosition = respawnPosition;
-            respawnPosition = target.position;
-            respawnRotation = target.rotation;
+        respawnPosition = target.position;
+        respawnRotation = target.rotation;
             Debug.Log($"✅ Checkpoint atteint : {target.name}");
             Debug.Log($"   Position précédente: {oldPosition}");
         }

@@ -129,7 +129,7 @@ public class respawn : MonoBehaviour
     {
         // Priorité 1 : Vérifier si c'est le GameObject du joueur assigné directement
         if (playerObject != null)
-        {
+    {
             // Vérifier si le collider appartient au joueur ou à ses enfants
             if (other.gameObject == playerObject || other.transform.IsChildOf(playerObject.transform))
             {
